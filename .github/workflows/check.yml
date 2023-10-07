@@ -44,7 +44,7 @@ jobs:
           components: clippy, rustfmt
       - name: Run cargo check
         working-directory: ${{ inputs.path }}
-        run: cargo check --locked --verbose --target ${{ matrix.target }} --package apex-client
+        run: cargo check --locked --verbose --target ${{ matrix.target }}
 #      - name: Run cargo fmt code style
 #        working-directory: ${{ inputs.path }}
 #        run: cargo fmt --all -- --check
