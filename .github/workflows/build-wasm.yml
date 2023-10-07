@@ -54,7 +54,7 @@ jobs:
         run: wasm-pack build --out-dir www/pkg --release
       - name: Deploy WASM
         uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/mistress'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./www/pkg
