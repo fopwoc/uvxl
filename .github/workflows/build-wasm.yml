@@ -16,7 +16,7 @@ jobs:
         package:
           - { name: "client", path: "./" }
         platform: 
-          - { os: "ubuntu-latest", target: [wasm32-unknown-unknown] }
+          - { os: "ubuntu-latest", target: "wasm32-unknown-unknown" }
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

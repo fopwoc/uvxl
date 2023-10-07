@@ -14,7 +14,7 @@ jobs:
           - { name: "client", path: "./" }
           - { name: "server", path: "./uvxl-server" }
         platform: 
-          - { os: "ubuntu-latest", target: [x86_64-unknown-linux-gnu] }
+          - { os: "ubuntu-latest", target: "x86_64-unknown-linux-gnu" }
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
