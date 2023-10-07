@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         package:
-          - { name: "client", path: "./" }
+          - { name: "${{ github.event.repository.name }}", path: "./" }
         platform: 
           - { os: "ubuntu-latest", target: "wasm32-unknown-unknown" }
     steps:
