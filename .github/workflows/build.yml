@@ -59,4 +59,4 @@ jobs:
         with:
           name: ${{ github.event.repository.name }}_${{ inputs.name }}_${{ matrix.target }}_${{ github.sha }}
           path: |
-            target/${{ matrix.target }}/release/${{ inputs.binary }}${{ (runner.os == 'Windows' && '.exe') || '' }}
+            ${{ inputs.path }}target/${{ matrix.target }}/release/${{ inputs.binary }}${{ (runner.os == 'Windows' && '.exe') || '' }}
