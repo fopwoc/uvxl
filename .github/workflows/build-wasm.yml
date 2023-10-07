@@ -1,0 +1,51 @@
+name: Build and deploy WASM
+
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+
+jobs:
+  build_wasm:
+    name: Build and deploy WASM
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - { name: "client", path: "./" }
+        platform: 
+          - { os: "ubuntu-latest", target: [wasm32-unknown-unknown] }
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install Rust nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: ${{ matrix.platform.target }}
+      - name: Set up cargo cache
+        uses: actions/cache@v3
+        continue-on-error: false
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            ${{ matrix.package.path }}target/
+          key: ${{ runner.os }}-cargo-${{ matrix.package.name }}-${{ matrix.platform.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-${{ matrix.package.name }}-${{ matrix.platform.target }}
+      - name: Install WASM
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Build WASM
+        run: wasm-pack build --out-dir www/pkg --release
+      - name: Deploy WASM
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/master'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./www/pkg

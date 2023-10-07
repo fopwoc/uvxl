@@ -1,0 +1,48 @@
+name: Analyze
+
+on:
+  workflow_call:
+
+jobs:
+  check:
+    name: Analyze ${{ matrix.package.name }}
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - { name: "client", path: "./" }
+          - { name: "server", path: "./uvxl-server" }
+        platform: 
+          - { os: "ubuntu-latest", target: [x86_64-unknown-linux-gnu] }
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up cargo cache
+        uses: actions/cache@v3
+        continue-on-error: false
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            ${{ matrix.package.path }}target/
+          key: ${{ runner.os }}-cargo-${{ matrix.package.name }}-${{ matrix.platform.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-${{ matrix.package.name }}-${{ matrix.platform.target }}
+      - name: Install Rust nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: ${{ matrix.platform.target }}
+          components: clippy, rustfmt
+      - name: Run cargo check
+        working-directory: ${{ matrix.package.path }}
+        run: cargo check --locked --verbose --target ${{ matrix.platform.target }} --package apex-client
+#      - name: Run cargo fmt code style
+#        working-directory: ${{ matrix.package.path }}
+#        run: cargo fmt --all -- --check
+      - name: Run cargo clippy
+        working-directory: ${{ matrix.package.path }}
+        run: cargo clippy --all-features --all-targets -- -D warnings
+      - name: Run cargo audit
+        working-directory: ${{ matrix.package.path }}
+        run: cargo audit
