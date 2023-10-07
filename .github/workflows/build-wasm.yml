@@ -2,6 +2,16 @@ name: Build and deploy WASM
 
 on:
   workflow_call:
+    inputs:
+      name:
+        type: string
+        required: true
+      binary:
+        type: string
+        required: true
+      path:
+        type: string
+        required: true
 
 permissions:
   contents: write
@@ -9,14 +19,13 @@ permissions:
 jobs:
   build_wasm:
     name: Build and deploy WASM
-    runs-on: ${{ matrix.platform.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        package:
-          - { name: "${{ github.event.repository.name }}", path: "./" }
-        platform: 
-          - { os: "ubuntu-latest", target: "wasm32-unknown-unknown" }
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,7 +36,7 @@ jobs:
       - name: Install Rust nightly
         uses: dtolnay/rust-toolchain@nightly
         with:
-          targets: ${{ matrix.platform.target }}
+          targets: ${{ matrix.target }}
       - name: Set up cargo cache
         uses: actions/cache@v3
         continue-on-error: false
@@ -36,9 +45,9 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            ${{ matrix.package.path }}target/
-          key: ${{ runner.os }}-cargo-${{ matrix.package.name }}-${{ matrix.platform.target }}-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-${{ matrix.package.name }}-${{ matrix.platform.target }}
+            ${{ inputs.path }}target/
+          key: ${{ runner.os }}-cargo-${{ inputs.name }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-${{ inputs.name }}-${{ matrix.target }}
       - name: Install WASM
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Build WASM
